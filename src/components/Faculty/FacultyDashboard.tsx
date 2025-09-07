@@ -11,6 +11,7 @@ import { TodaysClasses } from './TodaysClasses';
 import { TodaysClassesWithStudents } from './TodaysClassesWithStudents';
 import { ClassCoordinatorSections } from './ClassCoordinatorSections';
 import { StudentManagement } from './StudentManagement';
+import { ActivityApprovals } from './ActivityApprovals';
 
 export const FacultyDashboard: React.FC = () => {
   const [courses, setCourses] = useState([]);
@@ -163,6 +164,16 @@ export const FacultyDashboard: React.FC = () => {
               >
                 Classes & Schedule
               </button>
+              <button
+                onClick={() => setActiveTab('approvals')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'approvals'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Activity Approvals
+              </button>
             </nav>
           </div>
         </div>
@@ -293,6 +304,18 @@ export const FacultyDashboard: React.FC = () => {
               </div>
             </div>
           </>
+        )}
+
+        {activeTab === 'approvals' && (
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Activity Approvals</h2>
+              <p className="text-sm text-gray-600 mt-1">Review and approve student activity submissions</p>
+            </div>
+            <div className="p-6">
+              <ActivityApprovals />
+            </div>
+          </div>
         )}
 
         {/* Hidden old content - will be removed */}
