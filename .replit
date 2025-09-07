@@ -69,3 +69,8 @@ exposeLocalhost = true
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[deployment]
+deploymentTarget = "vm"
+run = ["bash", "-c", "mongod --dbpath /tmp/mongodb --noauth --bind_ip 127.0.0.1 --fork --logpath /tmp/mongodb.log && cd server && npm start & npm start"]
+build = ["npm", "run", "build"]
