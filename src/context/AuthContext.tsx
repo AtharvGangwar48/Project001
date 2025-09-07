@@ -50,7 +50,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         ...(role === 'faculty' ? { facultyId: username } : { username })
       };
       
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const API_BASE = process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
+        ? `https://${window.location.hostname}:3001/api`
+        : 'http://localhost:3001/api';
+      
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // If user is university role, fetch university data
         if (data.user.role === 'university') {
           try {
-            const univResponse = await fetch('http://localhost:3001/api/universities', {
+            const univResponse = await fetch(`${API_BASE}/universities`, {
               credentials: 'include'
             });
             if (univResponse.ok) {
@@ -98,12 +102,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const adminLogin = async (passcode: string): Promise<boolean> => {
-    return login('', passcode, 'admin');
+    return login('admin', passcode, 'admin');
   };
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:3001/api/auth/logout', {
+      const API_BASE = process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
+        ? `https://${window.location.hostname}:3001/api`
+        : 'http://localhost:3001/api';
+      
+      await fetch(`${API_BASE}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
