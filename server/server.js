@@ -21,6 +21,7 @@ import timetableRoutes from './routes/timetable.js';
 import reportRoutes from './routes/reports.js';
 import metricsRoutes from './routes/metrics.js';
 import classScheduleRoutes from './routes/classSchedule.js';
+import attendanceRoutes from './routes/attendance.js';
 
 dotenv.config();
 
@@ -72,6 +73,7 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/class-schedule', classScheduleRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 app.listen(PORT, 'localhost', () => {
   console.log(`Server running on localhost:${PORT}`);
