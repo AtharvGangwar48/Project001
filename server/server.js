@@ -25,14 +25,18 @@ import classScheduleRoutes from './routes/classSchedule.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // Connect to MongoDB
 connectDB();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5000',
+    process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null
+  ].filter(Boolean),
   credentials: true
 }));
 
@@ -69,6 +73,6 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/class-schedule', classScheduleRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, 'localhost', () => {
+  console.log(`Server running on localhost:${PORT}`);
 });
