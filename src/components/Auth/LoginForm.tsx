@@ -4,9 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
+  onSwitchToStudentRegister: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onSwitchToStudentRegister }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -27,7 +28,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
       let success = false;
       
       if (formData.role === 'admin') {
-        success = adminLogin(formData.password);
+        success = await adminLogin(formData.password);
       } else {
         success = await login(formData.username, formData.password, formData.role);
       }
@@ -70,6 +71,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               >
                 <option value="university">University</option>
+                <option value="student">Student</option>
+                <option value="spoc">SPOC/HOD</option>
+                <option value="faculty">Faculty</option>
                 <option value="admin">System Administrator</option>
               </select>
             </div>
@@ -77,7 +81,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
             {formData.role !== 'admin' && (
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
+                  {formData.role === 'faculty' ? 'Faculty ID' : 'Username'}
                 </label>
                 <input
                   id="username"
@@ -87,7 +91,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                   value={formData.username}
                   onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
                   className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your username"
+                  placeholder={formData.role === 'faculty' ? 'Enter your Faculty ID' : 'Enter your username'}
                 />
               </div>
             )}
@@ -141,17 +145,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
           </div>
 
           {formData.role !== 'admin' && (
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                New university?{' '}
-                <button
-                  type="button"
-                  onClick={onSwitchToRegister}
-                  className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
-                >
-                  Register here
-                </button>
-              </p>
+            <div className="text-center space-y-2">
+              {formData.role === 'university' && (
+                <p className="text-sm text-gray-600">
+                  New university?{' '}
+                  <button
+                    type="button"
+                    onClick={onSwitchToRegister}
+                    className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+                  >
+                    Register here
+                  </button>
+                </p>
+              )}
+              {formData.role === 'student' && (
+                <p className="text-sm text-gray-600">
+                  New student?{' '}
+                  <button
+                    type="button"
+                    onClick={onSwitchToStudentRegister}
+                    className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+                  >
+                    Register here
+                  </button>
+                </p>
+              )}
             </div>
           )}
         </form>

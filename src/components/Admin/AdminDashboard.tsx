@@ -11,13 +11,30 @@ export const AdminDashboard: React.FC = () => {
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
 
   useEffect(() => {
-    setUniversities(getUniversities());
+    const fetchUniversities = async () => {
+      try {
+        const data = await getUniversities();
+        setUniversities(data);
+      } catch (error) {
+        console.error('Failed to fetch universities:', error);
+      }
+    };
+    fetchUniversities();
   }, []);
 
-  const handleStatusUpdate = (id: string, status: 'approved' | 'rejected') => {
-    updateUniversityStatus(id, status);
-    setUniversities(getUniversities());
-    setSelectedUniversity(null);
+  const handleStatusUpdate = async (id: string, status: 'approved' | 'rejected') => {
+    try {
+      console.log('Updating university status:', { id, status });
+      console.log('University object:', universities.find(u => u.id === id || u._id === id));
+      await updateUniversityStatus(id, status);
+      console.log('Status updated successfully');
+      const data = await getUniversities();
+      setUniversities(data);
+      setSelectedUniversity(null);
+    } catch (error) {
+      console.error('Failed to update university status:', error);
+      alert(`Failed to ${status} university: ${error.message}`);
+    }
   };
 
   const filteredUniversities = universities.filter(u => {
@@ -128,6 +145,12 @@ export const AdminDashboard: React.FC = () => {
                           <div>
                             <span className="font-medium">Type:</span> {university.type}
                           </div>
+                          <div className="col-span-2">
+                            <span className="font-medium">Admin:</span> {university.adminName} ({university.adminDesignation})
+                          </div>
+                          <div className="col-span-2">
+                            <span className="font-medium">Admin Contact:</span> {university.adminContact}
+                          </div>
                         </div>
                       </div>
 
@@ -143,14 +166,14 @@ export const AdminDashboard: React.FC = () => {
                         {university.status === 'pending' && (
                           <>
                             <button
-                              onClick={() => handleStatusUpdate(university.id, 'approved')}
+                              onClick={() => handleStatusUpdate(university._id || university.id, 'approved')}
                               className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"
                             >
                               <Check className="h-4 w-4 mr-1" />
                               Approve
                             </button>
                             <button
-                              onClick={() => handleStatusUpdate(university.id, 'rejected')}
+                              onClick={() => handleStatusUpdate(university._id || university.id, 'rejected')}
                               className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors"
                             >
                               <X className="h-4 w-4 mr-1" />
@@ -231,12 +254,14 @@ export const AdminDashboard: React.FC = () => {
 
               {selectedUniversity.documents.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Uploaded Documents</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Document Links</label>
                   <ul className="text-sm text-gray-600 space-y-1">
                     {selectedUniversity.documents.map((doc, index) => (
                       <li key={index} className="flex items-center space-x-2">
-                        <span>📄</span>
-                        <span>{doc}</span>
+                        <span>🔗</span>
+                        <a href={doc} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                          {doc}
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -247,13 +272,13 @@ export const AdminDashboard: React.FC = () => {
             {selectedUniversity.status === 'pending' && (
               <div className="flex space-x-3 mt-6 pt-4 border-t border-gray-200">
                 <button
-                  onClick={() => handleStatusUpdate(selectedUniversity.id, 'approved')}
+                  onClick={() => handleStatusUpdate(selectedUniversity._id || selectedUniversity.id, 'approved')}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
                 >
                   Approve University
                 </button>
                 <button
-                  onClick={() => handleStatusUpdate(selectedUniversity.id, 'rejected')}
+                  onClick={() => handleStatusUpdate(selectedUniversity._id || selectedUniversity.id, 'rejected')}
                   className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Reject Application

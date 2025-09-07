@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthState, User, University } from '../types';
-import { getUniversities } from '../services/dataService';
+
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string, role?: string) => Promise<boolean>;
-  logout: () => void;
-  adminLogin: (passcode: string) => boolean;
+  logout: () => Promise<void>;
+  adminLogin: (passcode: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,78 +42,75 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (username: string, password: string, role?: string): Promise<boolean> => {
-    // Admin login
-    if (role === 'admin' && username === 'admin' && password === 'ADMIN2025') {
-      const user: User = {
-        id: 'admin',
-        username: 'admin',
-        password: '',
-        role: 'admin',
+    try {
+      const loginData = {
+        role,
+        password,
+        passcode: password,
+        ...(role === 'faculty' ? { facultyId: username } : { username })
       };
       
-      const newAuthState = {
-        isAuthenticated: true,
-        user,
-        university: null,
-      };
+      const response = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(loginData),
+      });
+
+      const data = await response.json();
       
-      setAuthState(newAuthState);
-      localStorage.setItem('authState', JSON.stringify(newAuthState));
-      return true;
+      if (data.success) {
+        let university = null;
+        
+        // If user is university role, fetch university data
+        if (data.user.role === 'university') {
+          try {
+            const univResponse = await fetch('http://localhost:3001/api/universities', {
+              credentials: 'include'
+            });
+            if (univResponse.ok) {
+              const univData = await univResponse.json();
+              university = univData.data.find((u: any) => u._id === data.user.universityId);
+            }
+          } catch (error) {
+            console.error('Failed to fetch university data:', error);
+          }
+        }
+        
+        const newAuthState = {
+          isAuthenticated: true,
+          user: data.user,
+          university,
+        };
+        
+        setAuthState(newAuthState);
+        localStorage.setItem('authState', JSON.stringify(newAuthState));
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-
-    // University login
-    const universities = getUniversities();
-    const university = universities.find(
-      u => u.username === username && u.password === password && u.status === 'approved'
-    );
-
-    if (university) {
-      const user: User = {
-        id: university.id,
-        username: university.username,
-        password: '',
-        role: 'university',
-        universityId: university.id,
-      };
-
-      const newAuthState = {
-        isAuthenticated: true,
-        user,
-        university,
-      };
-
-      setAuthState(newAuthState);
-      localStorage.setItem('authState', JSON.stringify(newAuthState));
-      return true;
-    }
-
-    return false;
   };
 
-  const adminLogin = (passcode: string): boolean => {
-    if (passcode === 'ADMIN2025') {
-      const user: User = {
-        id: 'admin',
-        username: 'admin',
-        password: '',
-        role: 'admin',
-      };
-      
-      const newAuthState = {
-        isAuthenticated: true,
-        user,
-        university: null,
-      };
-      
-      setAuthState(newAuthState);
-      localStorage.setItem('authState', JSON.stringify(newAuthState));
-      return true;
-    }
-    return false;
+  const adminLogin = async (passcode: string): Promise<boolean> => {
+    return login('', passcode, 'admin');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch('http://localhost:3001/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
     setAuthState({
       isAuthenticated: false,
       user: null,

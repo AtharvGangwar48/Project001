@@ -5,9 +5,10 @@ import { saveUniversity } from '../../services/dataService';
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
+  onSwitchToStudentRegister: () => void;
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
+export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSwitchToStudentRegister }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -39,14 +40,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
     }));
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const fileNames = files.map(file => file.name);
-    setFormData(prev => ({
-      ...prev,
-      documents: [...prev.documents, ...fileNames]
-    }));
-  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +77,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
     };
 
     try {
-      saveUniversity(university);
+      await saveUniversity(university);
       setSuccess(true);
     } catch (error) {
       alert('Registration failed. Please try again.');
@@ -105,12 +99,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
               Your university registration has been submitted successfully. 
               You will receive confirmation once your application is reviewed and approved.
             </p>
-            <button
-              onClick={onSwitchToLogin}
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              Back to Login
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={onSwitchToLogin}
+                className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Back to Login
+              </button>
+              <p className="text-center text-sm text-gray-600">
+                Are you a student?{' '}
+                <button
+                  onClick={onSwitchToStudentRegister}
+                  className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+                >
+                  Register as Student
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -413,35 +418,51 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Documents
+                    Document Links (Google Drive)
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors">
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">
-                      Upload accreditation proof, affiliation letters, etc.
-                    </p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Please provide Google Drive links to your documents (accreditation proof, affiliation letters, etc.)
+                  </p>
+                  
+                  <div className="space-y-3">
                     <input
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="documents"
-                      accept=".pdf,.jpg,.png,.doc,.docx"
+                      type="url"
+                      placeholder="https://drive.google.com/file/d/... (Document 1)"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      onChange={(e) => {
+                        const links = formData.documents.slice();
+                        links[0] = e.target.value;
+                        setFormData(prev => ({ ...prev, documents: links.filter(Boolean) }));
+                      }}
                     />
-                    <label
-                      htmlFor="documents"
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                    >
-                      Choose Files
-                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/file/d/... (Document 2)"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      onChange={(e) => {
+                        const links = formData.documents.slice();
+                        links[1] = e.target.value;
+                        setFormData(prev => ({ ...prev, documents: links.filter(Boolean) }));
+                      }}
+                    />
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/file/d/... (Document 3)"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      onChange={(e) => {
+                        const links = formData.documents.slice();
+                        links[2] = e.target.value;
+                        setFormData(prev => ({ ...prev, documents: links.filter(Boolean) }));
+                      }}
+                    />
                   </div>
                   
                   {formData.documents.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-sm font-medium text-gray-700">Uploaded files:</p>
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-gray-700">Added document links:</p>
                       <ul className="text-sm text-gray-600">
                         {formData.documents.map((doc, index) => (
-                          <li key={index}>• {doc}</li>
+                          <li key={index} className="break-all">• {doc}</li>
                         ))}
                       </ul>
                     </div>
