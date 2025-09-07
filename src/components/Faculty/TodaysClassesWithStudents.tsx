@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE = process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
+  ? `https://${window.location.hostname}:3001/api`
+  : 'http://localhost:3001/api';
+
 export const TodaysClassesWithStudents: React.FC = () => {
   const [classes, setClasses] = useState([]);
   const [expandedClass, setExpandedClass] = useState<string | null>(null);
@@ -13,7 +17,7 @@ export const TodaysClassesWithStudents: React.FC = () => {
   const fetchTodaysClasses = async () => {
     try {
       const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-      const response = await fetch(`http://localhost:3001/api/timetable/faculty?day=${today}`, {
+      const response = await fetch(`${API_BASE}/timetable/faculty?day=${today}`, {
         credentials: 'include'
       });
       
@@ -30,7 +34,7 @@ export const TodaysClassesWithStudents: React.FC = () => {
 
   const fetchStudents = async (sectionId: string, classId: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/section-students/by-section/${sectionId}`, {
+      const response = await fetch(`${API_BASE}/section-students/by-section/${sectionId}`, {
         credentials: 'include'
       });
       

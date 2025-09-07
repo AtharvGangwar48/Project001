@@ -67,14 +67,18 @@ export const NewTimetableForm: React.FC<NewTimetableFormProps> = ({
     setLoading(true);
     
     try {
-      const response = await fetch('/api/class-schedule', {
+      const response = await fetch('/api/timetable', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          ...formData,
-          universityId: user?.universityId,
-          createdBy: user?.id || 'spoc'
+          sectionId: sections.find(s => s.name === formData.sectionName)?._id,
+          courseId: courses.find(c => c.name === formData.courseName)?._id,
+          facultyId: formData.facultyId,
+          dayOfWeek: formData.dayOfWeek,
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          room: formData.room
         })
       });
       

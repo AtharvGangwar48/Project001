@@ -3,6 +3,10 @@ import { BookOpen, Building } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Header } from '../Layout/Header';
 import { getCourses, getSections } from '../../services/dataService';
+
+const API_BASE = process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
+  ? `https://${window.location.hostname}:3001/api`
+  : 'http://localhost:3001/api';
 import { TodaysClasses } from './TodaysClasses';
 import { TodaysClassesWithStudents } from './TodaysClassesWithStudents';
 import { ClassCoordinatorSections } from './ClassCoordinatorSections';
@@ -23,13 +27,13 @@ export const FacultyDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       const [facultyResponse, approvalsResponse, sectionCoursesResponse] = await Promise.all([
-        fetch(`http://localhost:3001/api/faculty/details/${user?.id}`, {
+        fetch(`${API_BASE}/faculty/details/${user?.id}`, {
           credentials: 'include'
         }),
-        fetch('http://localhost:3001/api/student-details/pending', {
+        fetch(`${API_BASE}/student-details/pending`, {
           credentials: 'include'
         }),
-        fetch('http://localhost:3001/api/section-courses', {
+        fetch(`${API_BASE}/section-courses`, {
           credentials: 'include'
         })
       ]);
@@ -60,7 +64,7 @@ export const FacultyDashboard: React.FC = () => {
 
   const handleApproval = async (id: string, status: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/student-details/${id}/status`, {
+      const response = await fetch(`${API_BASE}/student-details/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

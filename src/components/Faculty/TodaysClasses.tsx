@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE = process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
+  ? `https://${window.location.hostname}:3001/api`
+  : 'http://localhost:3001/api';
+
 export const TodaysClasses: React.FC = () => {
   const [classes, setClasses] = useState([]);
   const [selectedDay, setSelectedDay] = useState(() => {
@@ -15,7 +19,7 @@ export const TodaysClasses: React.FC = () => {
 
   const fetchClasses = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/timetable/faculty?day=${selectedDay}`, {
+      const response = await fetch(`${API_BASE}/timetable/faculty?day=${selectedDay}`, {
         credentials: 'include'
       });
       
