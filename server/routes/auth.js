@@ -46,9 +46,21 @@ router.post('/register-student', async (req, res) => {
   try {
     const student = new Student(req.body);
     await student.save();
-    res.status(201).json({ success: true, message: 'Student registered successfully' });
+    res.status(201).json({ 
+      success: true, 
+      message: 'Student registered successfully',
+      data: student 
+    });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      res.status(400).json({ 
+        success: false, 
+        message: `${field} already exists` 
+      });
+    } else {
+      res.status(400).json({ success: false, message: error.message });
+    }
   }
 });
 

@@ -10,6 +10,7 @@ const API_BASE = process.env.NODE_ENV === 'development' && typeof window !== 'un
 import { TodaysClasses } from './TodaysClasses';
 import { TodaysClassesWithStudents } from './TodaysClassesWithStudents';
 import { ClassCoordinatorSections } from './ClassCoordinatorSections';
+import { StudentManagement } from './StudentManagement';
 
 export const FacultyDashboard: React.FC = () => {
   const [courses, setCourses] = useState([]);
@@ -18,6 +19,7 @@ export const FacultyDashboard: React.FC = () => {
   const [program, setProgram] = useState<any>(null);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [sectionCourses, setSectionCourses] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -127,111 +129,175 @@ export const FacultyDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Class Coordinator Sections */}
+        {/* Tab Navigation */}
         <div className="bg-white rounded-lg shadow-sm mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">My Class Coordinator Sections</h2>
-          </div>
-          <div className="p-6">
-            <ClassCoordinatorSections />
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('students')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'students'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Manage Students
+              </button>
+              <button
+                onClick={() => setActiveTab('classes')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'classes'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Classes & Schedule
+              </button>
+            </nav>
           </div>
         </div>
 
-        {/* Pending Approvals */}
-        <div className="bg-white rounded-lg shadow-sm mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Pending Approvals ({pendingApprovals.length})</h2>
-          </div>
-          <div className="p-6">
-            {pendingApprovals.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No pending approvals</p>
-            ) : (
-              <div className="space-y-4">
-                {pendingApprovals.map((item: any) => (
-                  <div key={item._id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 capitalize">
-                          {item.type.replace('_', ' ')} - {item.title}
+        {/* Tab Content */}
+        {activeTab === 'overview' && (
+          <>
+            {/* Class Coordinator Sections */}
+            <div className="bg-white rounded-lg shadow-sm mb-8">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">My Class Coordinator Sections</h2>
+              </div>
+              <div className="p-6">
+                <ClassCoordinatorSections />
+              </div>
+            </div>
+
+            {/* Pending Approvals */}
+            <div className="bg-white rounded-lg shadow-sm mb-8">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Pending Approvals ({pendingApprovals.length})</h2>
+              </div>
+              <div className="p-6">
+                {pendingApprovals.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No pending approvals</p>
+                ) : (
+                  <div className="space-y-4">
+                    {pendingApprovals.map((item: any) => (
+                      <div key={item._id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-gray-900 capitalize">
+                              {item.type.replace('_', ' ')} - {item.title}
+                            </h3>
+                            <p className="text-sm text-gray-600">Student: {item.studentId?.fullName}</p>
+                            <p className="text-sm text-gray-600">Roll No: {item.universityRollNo}</p>
+                            <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleApproval(item._id, 'approved')}
+                              className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleApproval(item._id, 'rejected')}
+                              className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                              Reject
+                            </button>
+                            <a 
+                              href={item.driveLink} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                              View
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Section-Course Assignments */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">My Section-Course Assignments</h2>
+              </div>
+              <div className="p-6">
+                {sectionCourses.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No assignments yet</p>
+                ) : (
+                  <div className="grid gap-4">
+                    {sectionCourses.filter(sc => sc.assignedFaculty?._id === user?.id).map((assignment: any) => (
+                      <div key={assignment._id} className="border border-gray-200 rounded-lg p-4">
+                        <h3 className="font-semibold text-gray-900">
+                          {assignment.courseId?.name} ({assignment.courseId?.code})
                         </h3>
-                        <p className="text-sm text-gray-600">Student: {item.studentId?.fullName}</p>
-                        <p className="text-sm text-gray-600">Roll No: {item.universityRollNo}</p>
-                        <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                        <p className="text-sm text-gray-600">
+                          Section: {assignment.sectionId?.name} - Year {assignment.sectionId?.year}, Semester {assignment.sectionId?.semester}
+                        </p>
+                        <p className="text-sm text-gray-600">Credits: {assignment.courseId?.credits}</p>
                       </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleApproval(item._id, 'approved')}
-                          className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleApproval(item._id, 'rejected')}
-                          className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-                        >
-                          Reject
-                        </button>
-                        <a 
-                          href={item.driveLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                          View
-                        </a>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </>
+        )}
 
-        {/* Today's Classes with Students */}
-        <div className="bg-white rounded-lg shadow-sm mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Today's Classes</h2>
+        {activeTab === 'students' && (
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Student Management</h2>
+              <p className="text-sm text-gray-600 mt-1">Manage students in your class coordinator sections</p>
+            </div>
+            <div className="p-6">
+              <StudentManagement />
+            </div>
           </div>
-          <div className="p-6">
-            <TodaysClassesWithStudents />
-          </div>
-        </div>
+        )}
 
-        {/* Weekly Schedule */}
-        <div className="bg-white rounded-lg shadow-sm mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Weekly Schedule</h2>
-          </div>
-          <div className="p-6">
-            <TodaysClasses />
-          </div>
-        </div>
-
-        {/* Section-Course Assignments */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">My Section-Course Assignments</h2>
-          </div>
-          <div className="p-6">
-            {sectionCourses.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No assignments yet</p>
-            ) : (
-              <div className="grid gap-4">
-                {sectionCourses.filter(sc => sc.assignedFaculty?._id === user?.id).map((assignment: any) => (
-                  <div key={assignment._id} className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-900">
-                      {assignment.courseId?.name} ({assignment.courseId?.code})
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Section: {assignment.sectionId?.name} - Year {assignment.sectionId?.year}, Semester {assignment.sectionId?.semester}
-                    </p>
-                    <p className="text-sm text-gray-600">Credits: {assignment.courseId?.credits}</p>
-                  </div>
-                ))}
+        {activeTab === 'classes' && (
+          <>
+            {/* Today's Classes with Students */}
+            <div className="bg-white rounded-lg shadow-sm mb-8">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Today's Classes</h2>
               </div>
-            )}
-          </div>
+              <div className="p-6">
+                <TodaysClassesWithStudents />
+              </div>
+            </div>
+
+            {/* Weekly Schedule */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Weekly Schedule</h2>
+              </div>
+              <div className="p-6">
+                <TodaysClasses />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Hidden old content - will be removed */}
+        <div style={{display: 'none'}}>
+        {/* Class Coordinator Sections */}
         </div>
       </main>
     </div>
