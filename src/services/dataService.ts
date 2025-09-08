@@ -1,8 +1,6 @@
 import { University, Program, SPOC, Section, Course, Faculty } from '../types';
 
-const API_BASE = process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
-  ? `https://${window.location.hostname}:3001/api`
-  : 'http://localhost:3001/api';
+const API_BASE = 'http://localhost:3001/api';
 
 const apiCall = async (url: string, options: RequestInit = {}) => {
   console.log('Making API call:', `${API_BASE}${url}`, options);

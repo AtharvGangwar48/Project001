@@ -102,7 +102,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const adminLogin = async (passcode: string): Promise<boolean> => {
-    return login('admin', passcode, 'admin');
+    if (passcode === 'ADMIN2025') {
+      const newAuthState = {
+        isAuthenticated: true,
+        user: { role: 'admin', username: 'admin' },
+        university: null,
+      };
+      setAuthState(newAuthState);
+      localStorage.setItem('authState', JSON.stringify(newAuthState));
+      return true;
+    }
+    return false;
   };
 
   const logout = async () => {

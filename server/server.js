@@ -34,11 +34,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:5000',
-    process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null
-  ].filter(Boolean),
+  origin: ['http://localhost:5173', 'http://localhost:5000'],
   credentials: true
 }));
 

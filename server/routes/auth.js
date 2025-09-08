@@ -81,13 +81,6 @@ router.post('/logout', (req, res) => {
   });
 });
 
-// Check auth status
-router.get('/me', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ success: true, user: req.user });
-  } else {
-    res.status(401).json({ success: false, message: 'Not authenticated' });
-  }
-});
+
 
 export default router;
